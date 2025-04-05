@@ -1,0 +1,33 @@
+
+PsychPal Installation Instructions
+=================================
+
+To run PsychPal, you need to have Python installed on your computer.
+
+Step 1: Install Python (if not already installed)
+------------------------------------------------
+1. Download Python 3.11 from https://www.python.org/downloads/
+2. During installation, make sure to check "Add Python to PATH"
+3. Complete the installation
+
+Step 2: Install Required Python Packages
+----------------------------------------
+1. Open Command Prompt (or PowerShell)
+2. Navigate to the PsychPal directory:
+   cd path\to\PsychPal-Standalone\PsychPal
+3. Run the following command:
+   pip install -r requirements.txt
+
+Step 3: Launch PsychPal
+----------------------
+1. Return to the main PsychPal-Standalone folder
+2. Double-click on "Start-PsychPal.bat"
+3. The application should start automatically
+
+Troubleshooting
+--------------
+- If you get an error about tkinter, you may need to reinstall Python with the "tcl/tk and IDLE" option selected
+- If the server fails to start, check that ports 5000 is not in use by another application
+- For other issues, consult the error messages in the command window
+
+Enjoy using PsychPal!
