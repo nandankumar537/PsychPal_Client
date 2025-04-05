@@ -9,10 +9,11 @@ conversations remain private and secure. All data is stored locally.
 
 Getting Started:
 ---------------
-1. Run Start-PsychPal.bat to launch the application
-2. Go to the Models tab and download a model
-3. Return to the Chat tab to start chatting
-4. Your conversations are stored only on your device
+1. Run Install-Dependencies.bat first (one-time setup)
+2. Run Start-PsychPal.bat to launch the application
+3. Go to the Models tab and download a model
+4. Return to the Chat tab to start chatting
+5. Your conversations are stored only on your device
 
 Privacy Features:
 ---------------
@@ -27,4 +28,4 @@ Requirements:
 - Python 3.8 or later with tkinter support
 - Recommended: 4GB RAM or more for model operations
 
-For issues or feedback, please visit the project website.
+For detailed installation instructions, see INSTALL.txt

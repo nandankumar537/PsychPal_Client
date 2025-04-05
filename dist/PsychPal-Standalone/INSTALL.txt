@@ -4,6 +4,15 @@ PsychPal Installation Instructions
 
 To run PsychPal, you need to have Python installed on your computer.
 
+System Requirements
+------------------
+- Windows 10 or later (64-bit recommended)
+- Python 3.8 or later with tkinter support
+- 8GB RAM minimum (16GB recommended)
+- 10GB free disk space for application and model files
+- CPU: Intel i5/AMD Ryzen 5 or better (for reasonable performance)
+- GPU: Optional but recommended for faster model operations
+
 Step 1: Install Python (if not already installed)
 ------------------------------------------------
 1. Download Python 3.11 from https://www.python.org/downloads/
@@ -12,6 +21,11 @@ Step 1: Install Python (if not already installed)
 
 Step 2: Install Required Python Packages
 ----------------------------------------
+EASY METHOD:
+1. Double-click on "Install-Dependencies.bat"
+2. Wait for the installation to complete
+
+MANUAL METHOD:
 1. Open Command Prompt (or PowerShell)
 2. Navigate to the PsychPal directory:
    cd path\to\PsychPal-Standalone\PsychPal
@@ -24,10 +38,18 @@ Step 3: Launch PsychPal
 2. Double-click on "Start-PsychPal.bat"
 3. The application should start automatically
 
+First-Time Use
+-------------
+1. On first launch, go to the Models tab
+2. Download a model (this may take several minutes depending on your internet connection)
+3. Once the model is downloaded, you can begin chatting
+4. Note: Model files can be large (1-2GB). The download may take time and requires a stable internet connection
+
 Troubleshooting
 --------------
 - If you get an error about tkinter, you may need to reinstall Python with the "tcl/tk and IDLE" option selected
 - If the server fails to start, check that ports 5000 is not in use by another application
+- If model downloads fail, check your internet connection and try again
 - For other issues, consult the error messages in the command window
 
 Enjoy using PsychPal!
