@@ -1,0 +1,38 @@
+modules = ["nodejs-20", "python-3.11"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "PsychPal Server"
+
+[[workflows.workflow]]
+name = "PsychPal Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python simplified_app.py"
+waitForPort = 5000
+
+[deployment]
+run = ["sh", "-c", "cd server && python simplified_app.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

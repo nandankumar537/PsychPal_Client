@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a5a5a5;
+}
+
+/* Fade-in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Typing animation dots */
+.dot-typing {
+  position: relative;
+  left: -9999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #6366f1;
+  color: #6366f1;
+  box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  animation: dot-typing 1.5s infinite linear;
+}
+
+@keyframes dot-typing {
+  0% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+  16.667% {
+    box-shadow: 9984px -10px 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+  33.333% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+  50% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px -10px 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+  66.667% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+  83.333% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px -10px 0 0 #6366f1;
+  }
+  100% {
+    box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
+  }
+}
+
+/* Message bubble animations */
+.message-bubble-in {
+  animation: bubbleIn 0.3s ease-out;
+  transform-origin: bottom left;
+}
+
+.message-bubble-out {
+  animation: bubbleIn 0.3s ease-out;
+  transform-origin: bottom right;
+}
+
+@keyframes bubbleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
