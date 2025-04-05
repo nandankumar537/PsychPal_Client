@@ -103,18 +103,18 @@ const ChatInterface = ({ conversation, isModelLoaded, onNewConversation, onUpdat
       return (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center p-6 max-w-md">
-            <h2 className="text-2xl font-bold text-indigo-600 mb-3">Welcome to PsychPal</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-2xl font-bold text-[#8AB795] mb-3">Welcome to PsychPal</h2>
+            <p className="text-[#2D3047] mb-4">
               Your privacy-first mental health assistant. All conversations are stored locally on your device.
             </p>
             {!isModelLoaded && (
-              <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-4">
-                <p className="text-yellow-700 text-sm">
+              <div className="bg-[#F9F8F4] border border-[#A8A4CE] p-3 rounded-md mb-4">
+                <p className="text-[#2D3047] text-sm">
                   Please download a model from the Models tab to start chatting offline.
                 </p>
               </div>
             )}
-            <p className="text-gray-500 text-sm italic mt-4">
+            <p className="text-[#2D3047] opacity-70 text-sm italic mt-4">
               Type a message below to begin your conversation.
             </p>
           </div>
@@ -125,62 +125,53 @@ const ChatInterface = ({ conversation, isModelLoaded, onNewConversation, onUpdat
   };
   
   return (
-    <div className="flex flex-col h-full">
-      {/* Chat header */}
-      <div className="bg-white border-b p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-800">
+    <div className="flex flex-col h-full bg-[#F9F8F4] font-['Quicksand']">
+      {/* Header */}
+      <div className="bg-[#8AB795] p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-white">
           {conversation ? conversation.title : 'New Conversation'}
         </h2>
       </div>
-      
-      {/* Chat messages area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {renderWelcomeMessage()}
-        
+
         {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`mb-4 ${message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
-          >
-            <div 
-              className={`max-w-3/4 p-3 rounded-lg ${
-                message.role === 'user' 
-                  ? 'bg-indigo-600 text-white rounded-br-none' 
-                  : 'bg-white text-gray-800 border rounded-bl-none shadow-sm'
-              }`}
-            >
-              <p className="whitespace-pre-wrap">{message.content}</p>
-              <div 
-                className={`text-xs mt-1 ${
-                  message.role === 'user' ? 'text-indigo-200' : 'text-gray-400'
-                }`}
-              >
+          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[70%] p-4 rounded-2xl ${
+              message.role === 'user'
+                ? 'bg-[#A8A4CE] text-white rounded-br-none'
+                : 'bg-white text-[#2D3047] shadow-md rounded-bl-none'
+            }`}>
+              <p className="text-[15px] leading-relaxed">{message.content}</p>
+              <div className={`text-xs mt-2 ${
+                message.role === 'user' ? 'text-white opacity-80' : 'text-[#2D3047] opacity-60'
+              }`}>
                 {new Date(message.timestamp).toLocaleTimeString()}
               </div>
             </div>
           </div>
         ))}
-        
+
         {isLoading && (
-          <div className="flex justify-start mb-4">
-            <div className="bg-white p-3 rounded-lg border rounded-bl-none shadow-sm">
-              <div className="flex items-center">
+          <div className="flex justify-start">
+            <div className="bg-white p-4 rounded-2xl shadow-md">
+              <div className="flex items-center space-x-2">
                 <div className="dot-typing"></div>
-                <span className="ml-2 text-sm text-gray-500">PsychPal is thinking...</span>
+                <span className="text-sm text-[#2D3047] opacity-60">Processing...</span>
               </div>
             </div>
           </div>
         )}
-        
-        <div ref={messagesEndRef} />
       </div>
-      
-      {/* Input area */}
-      <div className="bg-white border-t p-4">
-        <div className="flex rounded-lg border overflow-hidden">
+
+      {/* Input Area */}
+      <div className="bg-[#F9F8F4] border-t border-[#E9E5E3] p-4">
+        <div className="flex items-end space-x-3">
           <textarea
-            className="flex-1 px-4 py-3 focus:outline-none resize-none"
-            placeholder="Type your message here..."
+            className="flex-1 p-3 rounded-xl border border-[#A8A4CE] focus:outline-none focus:ring-2 focus:ring-[#8AB795] resize-none bg-white"
+            placeholder="Share your thoughts..."
             rows="2"
             value={input}
             onChange={handleInputChange}
@@ -188,60 +179,33 @@ const ChatInterface = ({ conversation, isModelLoaded, onNewConversation, onUpdat
             disabled={isLoading || !isModelLoaded}
           ></textarea>
           <button
-            className={`px-4 bg-indigo-600 text-white font-medium ${
+            className={`p-3 rounded-xl ${
               isLoading || !input.trim() || !isModelLoaded
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-indigo-700'
-            }`}
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-[#F9A686] hover:bg-[#F8957A] text-white'
+            } transition-colors`}
             onClick={handleSendMessage}
-            disabled={isLoading || !input.trim() || !isModelLoaded}
           >
-            Send
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
           </button>
         </div>
-        {!isModelLoaded && (
-          <div className="mt-2 text-orange-600 text-sm">
-            Please download a model from the Models tab to start chatting
-          </div>
-        )}
       </div>
-      
-      {/* CSS for typing animation */}
+
       <style jsx="true">{`
-        .dot-typing {
-          position: relative;
-          left: -9999px;
-          width: 6px;
-          height: 6px;
-          border-radius: 5px;
-          background-color: #6366f1;
-          color: #6366f1;
-          box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          animation: dot-typing 1.5s infinite linear;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&display=swap');
         
-        @keyframes dot-typing {
-          0% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
-          16.667% {
-            box-shadow: 9984px -5px 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
-          33.333% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
-          50% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px -5px 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
-          66.667% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
-          83.333% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px -5px 0 0 #6366f1;
-          }
-          100% {
-            box-shadow: 9984px 0 0 0 #6366f1, 9999px 0 0 0 #6366f1, 10014px 0 0 0 #6366f1;
-          }
+        .dot-typing {
+          width: 8px;
+          height: 8px;
+          background: #8AB795;
+          animation: dotTyping 1.4s infinite linear;
+        }
+
+        @keyframes dotTyping {
+          0%, 100% { opacity: 0.2 }
+          50% { opacity: 1 }
         }
       `}</style>
     </div>
