@@ -19,74 +19,204 @@ class PsychPalApp:
     def __init__(self, root):
         self.root = root
         self.root.title("PsychPal - Mental Health Chatbot")
-        self.root.geometry("1000x700")
-        self.root.minsize(800, 600)
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.root.geometry("1200x800")
+        self.root.minsize(1000, 700)
         
-        # Set icon
-        # self.root.iconbitmap('icon.ico') # Uncomment and provide an icon if available
+        # Color Palette - Therapeutic colors for mental well-being
+        self.colors = {
+            'primary': '#5B9AA0',        # Soothing teal
+            'secondary': '#B8E0D2',      # Soft mint
+            'background': '#F6F6F6',     # Light gray background
+            'sidebar_bg': '#ADD8E6',     # Light blue sidebar
+            'accent': '#D8A7B1',         # Soft pink
+            'text_dark': '#2D4356',      # Deep blue-gray
+            'text_medium': '#5C7B93',    # Medium blue-gray
+            'text_light': '#90AFC5',     # Light blue-gray
+            'button_hover': '#6DAEBC',   # Darker teal
+            'user_msg': '#E3F2FD',       # Light blue bubble
+            'bot_msg': '#F0F9E8',        # Light green bubble
+            'divider': '#E0E0E0',        # Light gray
+            'online': '#88D498',         # Soft green
+            'offline': '#F88379'         # Soft red
+        }
         
-        # Style
+        # Set window background
+        self.root.configure(bg=self.colors['background'])
+        
+        # Configure Styles
         self.style = ttk.Style()
-        self.style.configure('TFrame', background='#f0f0f0')
-        self.style.configure('Sidebar.TFrame', background='#4a4a9c')
-        self.style.configure('Content.TFrame', background='#f0f0f0')
-        self.style.configure('SidebarButton.TButton', background='#4a4a9c', foreground='white')
-        self.style.map('SidebarButton.TButton', 
-                       background=[('active', '#6868b0')],
-                       foreground=[('active', 'white')])
+        self.style.theme_use('clam')
+        
+        # Frame Styles
+        self.style.configure('TFrame', background=self.colors['background'])
+        self.style.configure('Sidebar.TFrame', background=self.colors['sidebar_bg'])
+        self.style.configure('Content.TFrame', background=self.colors['background'])
+        
+        # Button Styles
+        self.style.configure('Primary.TButton',
+                            background=self.colors['primary'],
+                            foreground=self.colors['text_dark'],
+                            font=('Inter', 10, 'bold'),
+                            padding=10,
+                            relief='flat')
+        self.style.map('Primary.TButton',
+                    background=[('active', self.colors['button_hover']),
+                               ('pressed', self.colors['button_hover']),
+                               ('disabled', '#546E7A')])
+        
+        # Sidebar Button
+        self.style.configure('SidebarButton.TButton',
+                          background=self.colors['sidebar_bg'],
+                          foreground=self.colors['text_dark'],
+                          font=('Inter', 11),
+                          padding=12,
+                          width=15,
+                          relief='flat')
+        self.style.map('SidebarButton.TButton',
+                    background=[('active', self.colors['secondary']),
+                               ('pressed', self.colors['secondary'])])
+        
+        # Entry Styles
+        self.style.configure('TEntry',
+                            fieldbackground=self.colors['secondary'],
+                            foreground=self.colors['text_dark'],
+                            padding=10,
+                            font=('Inter', 11))
+        
+        # Scrollbar Styles
+        self.style.configure('Vertical.TScrollbar',
+                            background=self.colors['background'],
+                            arrowcolor=self.colors['text_medium'],
+                            bordercolor=self.colors['background'])
+        
+        # Label Styles
+        self.style.configure('TLabel', 
+                          background=self.colors['background'],
+                          foreground=self.colors['text_dark'],
+                          font=('Inter', 11))
+        
+        self.style.configure('Title.TLabel',
+                          background=self.colors['background'],
+                          foreground=self.colors['primary'],
+                          font=('Inter', 18, 'bold'))
+        
+        self.style.configure('Sidebar.TLabel',
+                          background=self.colors['sidebar_bg'],
+                          foreground=self.colors['text_dark'])
+        
+        # LabelFrame Style
+        self.style.configure('TLabelframe', 
+                          background=self.colors['background'],
+                          foreground=self.colors['text_dark'],
+                          padding=15,
+                          borderwidth=0)
+        self.style.configure('TLabelframe.Label', 
+                          background=self.colors['sidebar_bg'],
+                          foreground=self.colors['text_dark'],
+                          font=('Inter', 12, 'bold'))
+        
+        # Checkbutton Style
+        self.style.configure('TCheckbutton',
+                          background=self.colors['background'],
+                          foreground=self.colors['text_dark'],
+                          font=('Inter', 11))
+        
+        # Progressbar Style
+        self.style.configure('Horizontal.TProgressbar',
+                          background=self.colors['primary'],
+                          troughcolor=self.colors['secondary'])
         
         # Model status
         self.model_loaded = False
         self.current_conversation_id = None
         
+        # Initialize missing attributes
+        self.server_status_var = tk.StringVar(value="Server: Starting...")
+        self.model_status_var = tk.StringVar(value="Model: Not Loaded")
+        self.model_var = tk.StringVar()  # For model selection in the combobox
+        
         # Main layout
         self.main_frame = ttk.Frame(root)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
         
         # Sidebar
-        self.sidebar = ttk.Frame(self.main_frame, width=200, style='Sidebar.TFrame')
-        self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        self.sidebar = ttk.Frame(self.main_frame, width=250, style='Sidebar.TFrame')
+        self.sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=0, pady=0)
+        
+        # Make sidebar a fixed width
         self.sidebar.pack_propagate(False)
         
-        # App title
-        ttk.Label(self.sidebar, text="PsychPal", 
-                 font=("Arial", 20, "bold"), foreground="white", 
-                 background='#4a4a9c').pack(pady=20)
+        # App logo and title
+        logo_frame = ttk.Frame(self.sidebar, style='Sidebar.TFrame')
+        logo_frame.pack(fill=tk.X, pady=(30, 20))
         
-        # Sidebar buttons
-        self.chat_btn = ttk.Button(self.sidebar, text="Chat", command=self.show_chat, 
-                                   style='SidebarButton.TButton', width=15)
-        self.chat_btn.pack(pady=5)
+        ttk.Label(logo_frame, text="PsychPal", 
+                 font=("Inter", 22, "bold"), foreground=self.colors['primary'], 
+                 background=self.colors['sidebar_bg']).pack()
         
-        self.models_btn = ttk.Button(self.sidebar, text="Models", command=self.show_models,
-                                    style='SidebarButton.TButton', width=15)
-        self.models_btn.pack(pady=5)
+        ttk.Label(logo_frame, text="Mental Health Assistant", 
+                 font=("Inter", 11), foreground=self.colors['text_medium'], 
+                 background=self.colors['sidebar_bg']).pack(pady=(0, 10))
         
-        self.settings_btn = ttk.Button(self.sidebar, text="Settings", command=self.show_settings,
-                                      style='SidebarButton.TButton', width=15)
-        self.settings_btn.pack(pady=5)
+        # Add a divider
+        ttk.Separator(self.sidebar, orient='horizontal').pack(fill=tk.X, padx=20, pady=10)
+        
+        # Sidebar buttons with icons (represented as text)
+        button_frame = ttk.Frame(self.sidebar, style='Sidebar.TFrame')
+        button_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        self.chat_btn = ttk.Button(button_frame, text="💬  Chat", command=self.show_chat, 
+                                   style='SidebarButton.TButton')
+        self.chat_btn.pack(fill=tk.X, pady=5)
+        
+        self.models_btn = ttk.Button(button_frame, text="🧠  Models", command=self.show_models,
+                                    style='SidebarButton.TButton')
+        self.models_btn.pack(fill=tk.X, pady=5)
+        
+        self.settings_btn = ttk.Button(button_frame, text="⚙️  Settings", command=self.show_settings,
+                                      style='SidebarButton.TButton')
+        self.settings_btn.pack(fill=tk.X, pady=5)
         
         # Status indicators
         status_frame = ttk.Frame(self.sidebar, style='Sidebar.TFrame')
-        status_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+        status_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=20, padx=20)
         
         self.server_status_var = tk.StringVar(value="Server: Starting...")
         self.model_status_var = tk.StringVar(value="Model: Not Loaded")
         
-        ttk.Label(status_frame, textvariable=self.server_status_var, 
-                 foreground="white", background='#4a4a9c').pack(pady=2)
-        ttk.Label(status_frame, textvariable=self.model_status_var, 
-                 foreground="white", background='#4a4a9c').pack(pady=2)
+        # Add status indicator circles
+        server_frame = ttk.Frame(status_frame, style='Sidebar.TFrame')
+        server_frame.pack(fill=tk.X, pady=2)
+        
+        self.server_indicator = tk.Canvas(server_frame, width=12, height=12, bg=self.colors['sidebar_bg'], 
+                                         highlightthickness=0)
+        self.server_indicator.pack(side=tk.LEFT, padx=(0, 8))
+        self.server_indicator.create_oval(2, 2, 10, 10, fill=self.colors['offline'], outline="")
+        
+        ttk.Label(server_frame, textvariable=self.server_status_var, 
+                foreground=self.colors['text_medium'], background=self.colors['sidebar_bg'],
+                font=('Inter', 10)).pack(side=tk.LEFT)
+        
+        model_frame = ttk.Frame(status_frame, style='Sidebar.TFrame')
+        model_frame.pack(fill=tk.X, pady=2)
+        
+        self.model_indicator = tk.Canvas(model_frame, width=12, height=12, bg=self.colors['sidebar_bg'], 
+                                        highlightthickness=0)
+        self.model_indicator.pack(side=tk.LEFT, padx=(0, 8))
+        self.model_indicator.create_oval(2, 2, 10, 10, fill=self.colors['offline'], outline="")
+        
+        ttk.Label(model_frame, textvariable=self.model_status_var, 
+                foreground=self.colors['text_medium'], background=self.colors['sidebar_bg'],
+                font=('Inter', 10)).pack(side=tk.LEFT)
         
         # Content area
         self.content = ttk.Frame(self.main_frame, style='Content.TFrame')
-        self.content.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        self.content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         # Initialize frames for different sections
-        self.chat_frame = ttk.Frame(self.content)
-        self.models_frame = ttk.Frame(self.content)
-        self.settings_frame = ttk.Frame(self.content)
+        self.chat_frame = ttk.Frame(self.content, style='Content.TFrame')
+        self.models_frame = ttk.Frame(self.content, style='Content.TFrame')
+        self.settings_frame = ttk.Frame(self.content, style='Content.TFrame')
         
         # Initialize UI components
         self.setup_chat_ui()
@@ -100,178 +230,413 @@ class PsychPalApp:
         self.check_server_status()
     
     def setup_chat_ui(self):
-        # Chat history
-        self.chat_history = scrolledtext.ScrolledText(self.chat_frame, wrap=tk.WORD, 
-                                                      font=("Arial", 10), state='disabled')
-        self.chat_history.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Chat header
+        header_frame = ttk.Frame(self.chat_frame, style='Content.TFrame')
+        header_frame.pack(fill=tk.X, padx=30, pady=(25, 5))
         
-        # Input frame
-        input_frame = ttk.Frame(self.chat_frame)
-        input_frame.pack(fill=tk.X, padx=10, pady=10)
+        ttk.Label(header_frame, text="Chat with PsychPal", 
+                 font=("Inter", 18, "bold"), foreground=self.colors['primary'],
+                 background=self.colors['background']).pack(anchor='w')
         
-        self.message_input = ttk.Entry(input_frame, font=("Arial", 12))
-        self.message_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        ttk.Label(header_frame, text="Your personal mental health assistant", 
+                 font=("Inter", 12), foreground=self.colors['text_medium'],
+                 background=self.colors['background']).pack(anchor='w', pady=(0, 10))
+        
+        # Chat container with border and rounded corners (simulated)
+        chat_container = ttk.Frame(self.chat_frame, style='TFrame')
+        chat_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=(5, 20))
+        
+        # Chat history with custom styling
+        self.chat_history = scrolledtext.ScrolledText(
+            chat_container, 
+            wrap=tk.WORD, 
+            font=("Inter", 11),
+            bg=self.colors['background'],
+            fg=self.colors['text_dark'],
+            padx=25,
+            pady=25,
+            relief='flat',
+            highlightthickness=0,
+            borderwidth=0
+        )
+        self.chat_history.pack(fill=tk.BOTH, expand=True)
+        
+        # Configure tags with improved styling
+        self.chat_history.tag_configure("user_msg_header", 
+                                    foreground=self.colors['text_light'],
+                                    font=("Inter", 10, "bold"))
+        
+        self.chat_history.tag_configure("bot_msg_header", 
+                                    foreground=self.colors['text_light'],
+                                    font=("Inter", 10, "bold"))
+        
+        self.chat_history.tag_configure("user_msg", 
+                                    foreground=self.colors['text_dark'],
+                                    background=self.colors['user_msg'],
+                                    font=("Inter", 11),
+                                    lmargin1=20,
+                                    lmargin2=20,
+                                    rmargin=20,
+                                    spacing1=10,
+                                    spacing3=10)
+        
+        self.chat_history.tag_configure("bot_msg", 
+                                    foreground=self.colors['text_dark'],
+                                    background=self.colors['bot_msg'],
+                                    font=("Inter", 11),
+                                    lmargin1=20,
+                                    lmargin2=20,
+                                    rmargin=20,
+                                    spacing1=10,
+                                    spacing3=10)
+        
+        # Input area with rounded appearance
+        input_frame = ttk.Frame(self.chat_frame, style='TFrame')
+        input_frame.pack(fill=tk.X, padx=30, pady=(0, 30))
+        
+        input_container = ttk.Frame(input_frame, style='TFrame')
+        input_container.pack(fill=tk.X)
+        
+        self.message_input = ttk.Entry(
+            input_container, 
+            font=("Inter", 12),
+            style='TEntry'
+        )
+        self.message_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        
+        # Bind Enter key to send message
         self.message_input.bind("<Return>", self.send_message)
         
-        self.send_btn = ttk.Button(input_frame, text="Send", command=self.send_message)
+        self.send_btn = ttk.Button(
+            input_container, 
+            text="Send", 
+            style='Primary.TButton',
+            command=self.send_message
+        )
         self.send_btn.pack(side=tk.RIGHT)
         
-        # Welcome message
-        self.welcome_text = """Welcome to PsychPal!
-        
-This is a privacy-focused mental health chatbot that runs locally on your device.
-All conversations are stored locally and processed with privacy in mind.
+        # Welcome message with more friendly formatting
+        self.welcome_text = """Welcome to PsychPal! 😊
+
+I'm here to listen and support your mental well-being. Feel free to share your thoughts, feelings, or concerns with me in a private, judgment-free space.
 
 To get started:
-1. Go to the Models tab and download a model
-2. Return here to start chatting
-3. Your conversations are private and secure
+• Go to the Models tab and download a model
+• Return here to start chatting
+• Remember, all conversations stay on your device
 
-Note: Please download a model before chatting.
-"""
+I'm designed to provide empathetic responses and gentle guidance, but I'm not a replacement for professional help. If you're experiencing a crisis, please contact a mental health professional or emergency services.
+
+How are you feeling today?"""
+
+        # Set initial welcome message
+        self.chat_history.config(state='normal')
+        self.chat_history.delete(1.0, tk.END)
+        self.chat_history.insert(tk.END, "PsychPal: ", "bot_msg_header")
+        self.chat_history.insert(tk.END, self.welcome_text + "\n\n", "bot_msg")
+        self.chat_history.config(state='disabled')
     
     def setup_models_ui(self):
-        # Title
-        ttk.Label(self.models_frame, text="Model Management", 
-                 font=("Arial", 16, "bold")).pack(padx=20, pady=10, anchor='w')
+        # Title with more padding
+        header_frame = ttk.Frame(self.models_frame, style='Content.TFrame')
+        header_frame.pack(fill=tk.X, padx=30, pady=(25, 5))
         
-        # Model status frame
-        status_frame = ttk.LabelFrame(self.models_frame, text="Current Model Status")
-        status_frame.pack(fill=tk.X, padx=20, pady=10)
+        ttk.Label(header_frame, text="Model Management", 
+                font=("Inter", 18, "bold"), foreground=self.colors['primary'],
+                background=self.colors['background']).pack(anchor='w')
+        
+        ttk.Label(header_frame, text="Download and manage conversation models", 
+                font=("Inter", 12), foreground=self.colors['text_medium'],
+                background=self.colors['background']).pack(anchor='w', pady=(0, 10))
+        
+        # Model status frame with better spacing
+        status_frame = ttk.LabelFrame(
+            self.models_frame, 
+            text="Current Model Status",
+            style='TLabelframe',
+            padding=20
+        )
+        status_frame.pack(fill=tk.X, padx=30, pady=15)
         
         self.model_detail_var = tk.StringVar(value="No model loaded")
-        ttk.Label(status_frame, textvariable=self.model_detail_var).pack(padx=10, pady=10)
+        ttk.Label(status_frame, 
+                textvariable=self.model_detail_var,
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).pack(anchor='w')
         
         # Available models frame
-        models_frame = ttk.LabelFrame(self.models_frame, text="Available Models")
-        models_frame.pack(fill=tk.BOTH, padx=20, pady=10)
+        models_frame = ttk.LabelFrame(
+            self.models_frame,
+            text="Download Model",
+            style='TLabelframe',
+            padding=20
+        )
+        models_frame.pack(fill=tk.X, padx=30, pady=15)
         
         # Model selection
-        ttk.Label(models_frame, text="Select a model to download:").pack(padx=10, pady=5, anchor='w')
+        ttk.Label(models_frame, 
+                text="Select a model to download:",
+                font=("Inter", 11),
+                foreground=self.colors['text_dark']
+                ).pack(anchor='w', pady=(0, 10))
         
-        self.model_var = tk.StringVar()
-        self.models_combo = ttk.Combobox(models_frame, textvariable=self.model_var, state='readonly')
-        self.models_combo.pack(fill=tk.X, padx=10, pady=5)
+        self.models_combo = ttk.Combobox(
+            models_frame, 
+            textvariable=self.model_var, 
+            state='readonly',
+            font=("Inter", 11),
+            height=15
+        )
+        self.models_combo.pack(fill=tk.X, pady=(0, 15))
         
-        # Progress bar and button
-        progress_frame = ttk.Frame(models_frame)
-        progress_frame.pack(fill=tk.X, padx=10, pady=10)
+        # Progress bar
+        self.download_progress = ttk.Progressbar(
+            models_frame, 
+            orient=tk.HORIZONTAL, 
+            length=100, 
+            mode='determinate',
+            style='Horizontal.TProgressbar'
+        )
+        self.download_progress.pack(fill=tk.X, pady=(0, 15))
         
-        self.download_progress = ttk.Progressbar(progress_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
-        self.download_progress.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        # Download button
+        self.download_btn = ttk.Button(
+            models_frame, 
+            text="Download Model", 
+            style='Primary.TButton',
+            command=self.download_model
+        )
+        self.download_btn.pack(fill=tk.X)
         
-        self.download_btn = ttk.Button(progress_frame, text="Download", command=self.download_model)
-        self.download_btn.pack(side=tk.RIGHT)
+        # Info box with improved styling
+        info_frame = ttk.LabelFrame(self.models_frame, text="Model Information", style='TLabelframe', padding=20)
+        info_frame.pack(fill=tk.X, padx=30, pady=15)
         
-        # Info box
-        info_frame = ttk.LabelFrame(self.models_frame, text="Model Information")
-        info_frame.pack(fill=tk.X, padx=20, pady=10)
+        info_text = """PsychPal uses local language models for complete privacy and offline capability.
         
-        info_text = """PsychPal uses local language models for privacy and offline capability.
-        
-Smaller models are faster but may have lower quality responses.
-Larger models offer better quality but require more system resources.
+• Smaller models are faster but may provide simpler responses
+• Larger models offer more nuanced conversations but require more resources
+• All processing happens on your device - your conversations never leave your computer
 
-All models are stored locally on your device and no data is sent to external servers during chat."""
+Models are designed to provide empathetic and supportive responses about mental health topics."""
         
-        ttk.Label(info_frame, text=info_text, wraplength=500, justify=tk.LEFT).pack(padx=10, pady=10)
+        ttk.Label(info_frame, text=info_text, 
+                wraplength=700, 
+                justify=tk.LEFT,
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']).pack()
     
     def setup_settings_ui(self):
-        # Title
-        ttk.Label(self.settings_frame, text="Settings", 
-                 font=("Arial", 16, "bold")).pack(padx=20, pady=10, anchor='w')
+        # Title with more padding
+        header_frame = ttk.Frame(self.settings_frame, style='Content.TFrame')
+        header_frame.pack(fill=tk.X, padx=30, pady=(25, 5))
         
-        # Training settings
-        training_frame = ttk.LabelFrame(self.settings_frame, text="Local Model Training")
-        training_frame.pack(fill=tk.X, padx=20, pady=10)
+        ttk.Label(header_frame, text="Settings", 
+                font=("Inter", 18, "bold"), foreground=self.colors['primary'],
+                background=self.colors['background']).pack(anchor='w')
+        
+        ttk.Label(header_frame, text="Configure your PsychPal experience", 
+                font=("Inter", 12), foreground=self.colors['text_medium'],
+                background=self.colors['background']).pack(anchor='w', pady=(0, 10))
+        
+        # Training settings with improved spacing
+        training_frame = ttk.LabelFrame(
+            self.settings_frame, 
+            text="Local Model Training",
+            style='TLabelframe',
+            padding=20
+        )
+        training_frame.pack(fill=tk.X, padx=30, pady=15)
         
         # Use local data checkbox
         self.use_local_data = tk.BooleanVar(value=True)
-        ttk.Checkbutton(training_frame, text="Use local conversation data for training", 
-                      variable=self.use_local_data).pack(padx=10, pady=5, anchor='w')
+        ttk.Checkbutton(
+            training_frame, 
+            text="Use local conversation data for training", 
+            variable=self.use_local_data,
+            style='TCheckbutton'
+        ).pack(anchor='w', pady=(0, 15))
         
         # Training parameters
         params_frame = ttk.Frame(training_frame)
-        params_frame.pack(fill=tk.X, padx=10, pady=5)
+        params_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Epochs
-        ttk.Label(params_frame, text="Epochs:").grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(params_frame, 
+                text="Epochs:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=0, padx=(0, 10), pady=5, sticky='w')
         self.epochs_var = tk.StringVar(value="1")
-        ttk.Spinbox(params_frame, from_=1, to=10, textvariable=self.epochs_var, width=5).grid(row=0, column=1, padx=5, pady=5)
+        ttk.Spinbox(params_frame, 
+                    from_=1, to=10, 
+                    textvariable=self.epochs_var,
+                    font=("Inter", 11),
+                    width=5).grid(row=0, column=1, padx=(0, 20), pady=5)
         
         # Batch size
-        ttk.Label(params_frame, text="Batch Size:").grid(row=0, column=2, padx=5, pady=5, sticky='w')
+        ttk.Label(params_frame, 
+                text="Batch Size:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=2, padx=(0, 10), pady=5, sticky='w')
         self.batch_size_var = tk.StringVar(value="4")
-        ttk.Spinbox(params_frame, from_=1, to=16, textvariable=self.batch_size_var, width=5).grid(row=0, column=3, padx=5, pady=5)
+        ttk.Spinbox(params_frame, 
+                   from_=1, to=16, 
+                   textvariable=self.batch_size_var,
+                   font=("Inter", 11),
+                   width=5).grid(row=0, column=3, padx=(0, 20), pady=5)
         
         # Learning rate
-        ttk.Label(params_frame, text="Learning Rate:").grid(row=0, column=4, padx=5, pady=5, sticky='w')
+        ttk.Label(params_frame, 
+                text="Learning Rate:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=4, padx=(0, 10), pady=5, sticky='w')
         self.learning_rate_var = tk.StringVar(value="0.0001")
-        ttk.Entry(params_frame, textvariable=self.learning_rate_var, width=8).grid(row=0, column=5, padx=5, pady=5)
+        ttk.Entry(params_frame, 
+                 textvariable=self.learning_rate_var,
+                 font=("Inter", 11),
+                 width=8).grid(row=0, column=5, padx=0, pady=5)
         
         # Training progress and button
-        progress_frame = ttk.Frame(training_frame)
-        progress_frame.pack(fill=tk.X, padx=10, pady=10)
+        self.training_progress = ttk.Progressbar(
+                training_frame, 
+                orient=tk.HORIZONTAL, 
+                length=100, 
+                mode='determinate',
+                style='Horizontal.TProgressbar'
+            )
+        self.training_progress.pack(fill=tk.X, pady=(0, 15))
         
-        self.training_progress = ttk.Progressbar(progress_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
-        self.training_progress.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
-        
-        self.train_btn = ttk.Button(progress_frame, text="Start Training", command=self.start_training)
-        self.train_btn.pack(side=tk.RIGHT)
-        
-        # Synchronization settings
-        sync_frame = ttk.LabelFrame(self.settings_frame, text="Server Synchronization")
-        sync_frame.pack(fill=tk.X, padx=20, pady=10)
-        
-        # Privacy params
-        privacy_frame = ttk.Frame(sync_frame)
-        privacy_frame.pack(fill=tk.X, padx=10, pady=5)
+        self.train_btn = ttk.Button(
+            training_frame,
+            text="Start Training",
+            style='Primary.TButton',
+            command=self.start_training
+        )
+        self.train_btn.pack(fill=tk.X)
+
+        # Privacy settings
+        privacy_frame = ttk.LabelFrame(
+            self.settings_frame, 
+            text="Privacy Settings",
+            style='TLabelframe',
+            padding=20
+        )
+        privacy_frame.pack(fill=tk.X, padx=30, pady=15)
+
+        # Privacy parameters
+        privacy_params_frame = ttk.Frame(privacy_frame)
+        privacy_params_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Epsilon
-        ttk.Label(privacy_frame, text="Privacy Epsilon:").grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        ttk.Label(privacy_params_frame, 
+                text="Privacy Epsilon:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=0, padx=(0, 10), pady=5, sticky='w')
         self.epsilon_var = tk.StringVar(value="2.0")
-        ttk.Entry(privacy_frame, textvariable=self.epsilon_var, width=8).grid(row=0, column=1, padx=5, pady=5)
+        ttk.Entry(privacy_params_frame, 
+                 textvariable=self.epsilon_var,
+                 font=("Inter", 11),
+                 width=8).grid(row=0, column=1, padx=(0, 20), pady=5)
         
         # Delta
-        ttk.Label(privacy_frame, text="Privacy Delta:").grid(row=0, column=2, padx=5, pady=5, sticky='w')
+        ttk.Label(privacy_params_frame, 
+                text="Privacy Delta:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=2, padx=(0, 10), pady=5, sticky='w')
         self.delta_var = tk.StringVar(value="1e-5")
-        ttk.Entry(privacy_frame, textvariable=self.delta_var, width=8).grid(row=0, column=3, padx=5, pady=5)
+        ttk.Entry(privacy_params_frame, 
+                 textvariable=self.delta_var,
+                 font=("Inter", 11),
+                 width=8).grid(row=0, column=3, padx=(0, 20), pady=5)
         
         # Sync frequency
-        ttk.Label(privacy_frame, text="Sync Frequency:").grid(row=0, column=4, padx=5, pady=5, sticky='w')
+        ttk.Label(privacy_params_frame, 
+                text="Sync Frequency:",
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']
+                ).grid(row=0, column=4, padx=(0, 10), pady=5, sticky='w')
         self.sync_freq_var = tk.StringVar(value="manual")
-        ttk.Combobox(privacy_frame, textvariable=self.sync_freq_var, width=10,
-                   values=["manual", "daily", "weekly"], state='readonly').grid(row=0, column=5, padx=5, pady=5)
+        ttk.Combobox(privacy_params_frame, 
+                    textvariable=self.sync_freq_var,
+                    font=("Inter", 11),
+                    width=10,
+                    values=["manual", "daily", "weekly"], 
+                    state='readonly').grid(row=0, column=5, padx=0, pady=5)
         
         # Sync progress and button
-        sync_progress_frame = ttk.Frame(sync_frame)
-        sync_progress_frame.pack(fill=tk.X, padx=10, pady=10)
+        self.sync_progress = ttk.Progressbar(
+            privacy_frame, 
+            orient=tk.HORIZONTAL, 
+            length=100, 
+            mode='determinate',
+            style='Horizontal.TProgressbar'
+        )
+        self.sync_progress.pack(fill=tk.X, pady=(0, 15))
         
-        self.sync_progress = ttk.Progressbar(sync_progress_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
-        self.sync_progress.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        self.sync_progress_label = ttk.Label(
+            privacy_frame,
+            text="Sync Progress: 0%",
+            font=("Inter", 11),
+            foreground=self.colors['text_medium']
+        )
+        self.sync_progress_label.pack(pady=(0, 15))
         
-        self.sync_btn = ttk.Button(sync_progress_frame, text="Sync with Server", command=self.sync_with_server)
-        self.sync_btn.pack(side=tk.RIGHT)
+        self.sync_btn = ttk.Button(
+            privacy_frame, 
+            text="Sync with Server", 
+            style='Primary.TButton',
+            command=self.sync_with_server
+        )
+        self.sync_btn.pack(fill=tk.X)
         
-        # Privacy note
-        ttk.Label(sync_frame, text="Privacy Note: When you sync with the server, only differential privacy protected model updates are shared, not your conversation data.",
-                wraplength=550, foreground='blue').pack(padx=10, pady=5)
+        # Privacy note with improved styling
+        ttk.Label(privacy_frame, 
+                text="Privacy Note: When you sync with the server, only differential privacy protected model updates are shared, not your conversation data.",
+                wraplength=700,
+                font=("Inter", 10, "italic"),
+                foreground=self.colors['text_medium']).pack(pady=(15, 0))
         
         # About section
-        about_frame = ttk.LabelFrame(self.settings_frame, text="About")
-        about_frame.pack(fill=tk.X, padx=20, pady=10)
+        about_frame = ttk.LabelFrame(
+            self.settings_frame, 
+            text="About PsychPal",
+            style='TLabelframe',
+            padding=20
+        )
+        about_frame.pack(fill=tk.X, padx=30, pady=15)
         
         about_text = """PsychPal v1.0.0
         
-A privacy-focused mental health chatbot that runs locally on your device.
-Your conversations are stored only on your device and are never shared with external servers.
+A privacy-focused mental health chatbot that runs completely on your device.
+Your conversations are stored only on your computer and are never shared with external servers.
 
-Built with Python, Tkinter, Flask, and HuggingFace models."""
+PsychPal is designed to provide a supportive space for mental health conversations while respecting your privacy and data sovereignty.
+
+Built with Python, Tkinter, Flask, and HuggingFace Transformer models."""
         
-        ttk.Label(about_frame, text=about_text, wraplength=550).pack(padx=10, pady=10)
+        ttk.Label(about_frame, 
+                text=about_text,
+                wraplength=700,
+                font=("Inter", 11),
+                foreground=self.colors['text_medium']).pack()
         
         # Github link
-        ttk.Label(about_frame, text="Source code", foreground='blue', cursor='hand2').pack(pady=5)
+        link_frame = ttk.Frame(about_frame)
+        link_frame.pack(pady=(15, 0))
+        
+        github_link = ttk.Label(link_frame, 
+                             text="View Source on GitHub",
+                             font=("Inter", 11, "underline"),
+                             foreground=self.colors['primary'],
+                             cursor="hand2")
+        github_link.pack()
+        github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/yourusername/psychpal"))
     
     def show_frame(self, frame):
         # Hide all frames
@@ -288,7 +653,8 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
         if not self.current_conversation_id:
             self.chat_history.config(state='normal')
             self.chat_history.delete(1.0, tk.END)
-            self.chat_history.insert(tk.END, self.welcome_text)
+            self.chat_history.insert(tk.END, "PsychPal: ", "bot_msg_header")
+            self.chat_history.insert(tk.END, self.welcome_text + "\n\n", "bot_msg")
             self.chat_history.config(state='disabled')
             self.current_conversation_id = str(int(time.time()))
         
@@ -340,6 +706,8 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
                 
                 if self.model_loaded:
                     self.model_status_var.set("Model: Loaded")
+                    self.model_indicator.delete("all")
+                    self.model_indicator.create_oval(2, 2, 10, 10, fill=self.colors['online'], outline="")
                     
                     # Get detailed model info
                     info_response = requests.get(f"{API_URL}/api/model/info")
@@ -352,9 +720,13 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
                         )
                 else:
                     self.model_status_var.set("Model: Not Loaded")
+                    self.model_indicator.delete("all")
+                    self.model_indicator.create_oval(2, 2, 10, 10, fill=self.colors['offline'], outline="")
                     self.model_detail_var.set("No model loaded")
         except Exception as e:
             self.model_status_var.set("Model: Error")
+            self.model_indicator.delete("all")
+            self.model_indicator.create_oval(2, 2, 10, 10, fill=self.colors['offline'], outline="")
             print(f"Error updating model status: {str(e)}")
     
     def send_message(self, event=None):
@@ -365,10 +737,10 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
         # Clear input
         self.message_input.delete(0, tk.END)
         
-        # Add user message to chat
+        # Add user message to chat with improved formatting
         self.chat_history.config(state='normal')
-        self.chat_history.insert(tk.END, f"\nYou: {message}\n", "user_msg")
-        self.chat_history.tag_configure("user_msg", foreground="#0000CC")
+        self.chat_history.insert(tk.END, "\nYou: ", "user_msg_header")
+        self.chat_history.insert(tk.END, f"{message}\n\n", "user_msg")
         self.chat_history.config(state='disabled')
         self.chat_history.see(tk.END)
         
@@ -382,10 +754,10 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
             if response.status_code == 200:
                 bot_reply = response.json().get("response", "Sorry, I couldn't generate a response.")
                 
-                # Add bot response to chat
+                # Add bot response to chat with improved formatting
                 self.chat_history.config(state='normal')
-                self.chat_history.insert(tk.END, f"\nPsychPal: {bot_reply}\n", "bot_msg")
-                self.chat_history.tag_configure("bot_msg", foreground="#006600")
+                self.chat_history.insert(tk.END, "PsychPal: ", "bot_msg_header")
+                self.chat_history.insert(tk.END, f"{bot_reply}\n\n", "bot_msg")
                 self.chat_history.config(state='disabled')
                 self.chat_history.see(tk.END)
             else:
@@ -586,6 +958,7 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
                     status = progress_data.get("status", "")
                     
                     self.sync_progress['value'] = progress
+                    self.sync_progress_label.config(text=f"Sync Progress: {progress}%")
                     
                     if status == "completed":
                         messagebox.showinfo("Success", "Sync completed successfully!")
@@ -614,13 +987,23 @@ Built with Python, Tkinter, Flask, and HuggingFace models."""
                 response = requests.get(f"{API_URL}")
                 if response.status_code == 200:
                     self.server_status_var.set("Server: Online")
+                    # Update indicator with glow effect
+                    self.server_indicator.delete("all")
+                    self.server_indicator.create_oval(2, 2, 12, 12, fill=self.colors['online'], outline="", tags="indicator")
+                    self.server_indicator.create_oval(0, 0, 14, 14, fill="", outline=self.colors['online'], width=2, tags="glow")
                     
                     # Check model status too
                     self.update_model_status()
                 else:
                     self.server_status_var.set("Server: Error")
+                    self.server_indicator.delete("all")
+                    self.server_indicator.create_oval(2, 2, 12, 12, fill=self.colors['offline'], outline="", tags="indicator")
+                    self.server_indicator.create_oval(0, 0, 14, 14, fill="", outline=self.colors['offline'], width=2, tags="glow")
             except Exception:
                 self.server_status_var.set("Server: Offline")
+                self.server_indicator.delete("all")
+                self.server_indicator.create_oval(2, 2, 12, 12, fill=self.colors['offline'], outline="", tags="indicator")
+                self.server_indicator.create_oval(0, 0, 14, 14, fill="", outline=self.colors['offline'], width=2, tags="glow")
             
             # Check again in 5 seconds
             self.root.after(5000, update_status)
