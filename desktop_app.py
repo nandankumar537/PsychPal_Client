@@ -636,7 +636,7 @@ Built with Python, Tkinter, Flask, and HuggingFace Transformer models."""
                              foreground=self.colors['primary'],
                              cursor="hand2")
         github_link.pack()
-        github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/yourusername/psychpal"))
+        github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/nandaankumar537/PsychPal_Client"))
     
     def show_frame(self, frame):
         # Hide all frames
